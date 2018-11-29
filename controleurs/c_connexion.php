@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Gestion de la connexion
  *
@@ -7,46 +8,45 @@
  * @category  PPE
  * @package   GSB
  * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
+ * @author    Johanna DUBIE <jonanadu38@gmail.com>
  * @copyright 2017 Réseau CERTA
  * @license   Réseau CERTA
  * @version   GIT: <0>
  * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
  */
-
 $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_STRING);
 if (!$uc) {
     $uc = 'demandeconnexion';
 }
 
 switch ($action) {
-case 'demandeConnexion':
-    include 'vues/v_connexion.php';
-    break;
-case 'valideConnexion':
-    $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_STRING);
-    $mdp = filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_STRING);
-    $visiteur = $pdo->getInfosVisiteur($login, $mdp);
-    if (!is_array($visiteur)) {
-        ajouterErreur('Login ou mot de passe incorrect');
-        include 'vues/v_erreurs.php';
+    case 'demandeConnexion':
         include 'vues/v_connexion.php';
-    } else {
-        $id = $visiteur['id'];
-        $nom = $visiteur['nom'];
-        $prenom = $visiteur['prenom'];
-        $typepersonnel = $visiteur['typepersonnel'];
-        
-        connecter($id, $nom, $prenom, $typepersonnel);
-        if ($typepersonnel == 'c'){
-            include 'vues/v_accueilC.php';
-        }else{       
-        header('Location: index.php');
+        break;
+    case 'valideConnexion':
+        $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_STRING);
+        $mdp = filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_STRING);
+        $visiteur = $pdo->getInfosVisiteur($login, $mdp);
+        if (!is_array($visiteur)) {
+            ajouterErreur('Login ou mot de passe incorrect');
+            include 'vues/v_erreurs.php';
+            include 'vues/v_connexion.php';
+        } else {
+            $id = $visiteur['id'];
+            $nom = $visiteur['nom'];
+            $prenom = $visiteur['prenom'];
+            $typepersonnel = $visiteur['typepersonnel'];
+
+            connecter($id, $nom, $prenom, $typepersonnel);
+            if ($typepersonnel == 'c') {
+                include 'vues/v_accueilC.php';
+            } else {
+                include 'vues/v_accueil.php';
+            }
         }
-    }
-   
-    break;
-default:
-    include 'vues/v_connexion.php';
-    break;
+
+        break;
+    default:
+        include 'vues/v_connexion.php';
+        break;
 }

@@ -1,8 +1,17 @@
 <?php
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Vue des frais
+ *
+ * PHP Version 7
+ *
+ * @category  PPE
+ * @package   GSB
+ * @author    Réseau CERTA <contact@reseaucerta.org>
+ * @author    Johanna DUBIE <jonanadu38@gmail.com>
+ * @copyright 2017 Réseau CERTA
+ * @license   Réseau CERTA
+ * @version   GIT: <0>
+ * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
  */
 ?>
 <hr>
@@ -33,7 +42,7 @@
                     <?php
                 }
                 ?>
-                <button class="btn btn-success" type="submit"
+                <button class="btn btn-success" type="submit" 
 
                         onclick="return confirm('Frais mis à jour');"
                         href="index.php?uc=validerFrais&action=validerMAJFraisForfait="
@@ -57,7 +66,7 @@
     <div class="panel panel-info">
         <div class="panel-heading">Descriptif des éléments hors forfait</div>
         <form method="post" 
-              action="index.php?uc=validerFrais&action=supprimerFraisHF" 
+              action="index.php?uc=validerFrais&action=supprimerEtReporterFraisHF" 
               role="form">
             <table class="table table-bordered table-responsive">
 
@@ -96,7 +105,7 @@
                             <input type="text" id="idFrais" 
                                    name="lesFrais[<?php echo $id ?>]"
                                    size="20" maxlength="50" 
-                                   value="<?php echo $statut." ".$libelle ?>" 
+                                   value="<?php echo $statut . " : " . $libelle ?>" 
                                    class="form-control">
                         </div>
                     </td>
@@ -108,15 +117,26 @@
                                    class="form-control">
                         </div></td>
                     <td>
-                        <button class="btn btn-danger" type="submit" href="index.php?uc=validerFrais&action=supprimerFraisHF&idFrais=<?php echo $id?>"
-                                role="form"  
-                                onclick="return confirm('Voulez-vous vraiment supprimer ce frais?');">Supprimer</button>
+                        <button class="btn btn-danger" type="submit" href="index.php?uc=validerFrais&action=supprimerFraisHF&idFraisHF=<?php echo $id ?>"
+                                role="form" name="SupprIdFraisHF" value="<?php echo $id ?>"
+                                onclick="if (confirm('Voulez-vous vraiment supprimer ce frais?')) {
+                                            this.form.submit();
+                                        } else {
+                                            return false;
+                                        }
+                                ">Supprimer</button>
 
 
-                        <button class="btn btn-success" type="submit" href="index.php?uc=validerFrais&action=reporterFraisHF&idFrais=<?php echo $id ?>"
-                                onclick="return confirm('Voulez-vous vraiment reporter ce frais ?');">Reporter</button>
+                        <button class="btn btn-success" type="submit" href="index.php?uc=validerFrais&action=reporterFraisHF&idFraisHF=<?php echo $id ?>"
+                                role="form" name="ReportIdFraisHF" value="<?php echo $id ?>"
+                                onclick="if (confirm('Voulez-vous vraiment reporter ce frais?')) {
+                                            this.form.submit();
+                                        } else {
+                                            return false;
+                                        }
+                                ">Reporter</button>
 
-                        <button class="btn btn-danger" type="reset" href="index.php?uc=validerFrais&action=ReinitialiserFraisHF&idFrais=<?php echo $id ?>" 
+                        <button class="btn btn-danger" type="reset" href="index.php?uc=validerFrais&action=ReinitialiserFraisHF&idFraisHF=<?php echo $id ?>" 
                                 >Réinitialiser</button>                        </td>
                     </tr>
                     <?php
@@ -129,23 +149,54 @@
             </table>
         </form>
     </div>
-    <?php
-    // Ici, je dois rajouter la boîte montrant le nombre de justificatifs reçus.
-    ?>
-    <h4>Nombre de justificatifs :</h4>
+</div>
+<div>
+    <form method="post" 
+          action="index.php?uc=validerFrais&action=majNbJustificatifs" 
+          role="form">
+              <?php
+// boîte montrant le nombre de justificatifs reçus.
+              ?>
+        <h4>Nombre de justificatifs :</h4>
 
-    <div class="form-group">
-        <input type="text" id="idFrais" 
-               name="lesFrais[<?php echo $idFrais ?>]"
-               size="4" maxlength="3" 
-               value="<?php echo $nbJustificatifs ?>" 
-               class="form-control">
-    </div>
-    <?php
-    //Ici, je dois rajouter un bouton pour valider de manière définitive la fiche de frais
-    ?>
-    <button class="btn btn-success" type="submit">Valider</button>
-    <button class="btn btn-danger" type="reset">Réinitialiser</button>
+        <div class="form-group">
+            <input type="text" id="nbJustificatifs" 
+                   name="nbJustificatifs"
+                   size="4" maxlength="3" 
+                   value="<?php echo $nbJustificatifs ?>" 
+                   class="form-control">
 
-    <hr>
+            <button class="btn btn-success" type="submit" 
+
+                    onclick="return confirm('Nb justificatifs mis à jour');"
+                    >Valider</button>
+        </div>
+
+        <input name="lstVisiteurs" value="<?php echo $visiteurASelectionner; ?>" type="hidden">
+        <input name="lstMois" value="<?php echo $moisASelectionner; ?>" type="hidden">
+
+    </form>
+</div>
+<div>
+
+    <div>
+    <form method="post" 
+          action="index.php?uc=validerFrais&action=validationFicheFrais" 
+          role="form">
+    <?php
+//bouton pour valider de manière définitive la fiche de frais
+    ?>
+    <button class="btn btn-success" type="submit"
+            href="index.php?uc=validerFrais&action=validationFicheFrais"
+            onclick="if (confirm('Fiche de frais validée')) {
+                        this.form.submit();
+                    } else {
+                        return false;
+                    }
+            ">Valider la fiche de frais</button>  
+        <input name="lstVisiteurs" value="<?php echo $visiteurASelectionner; ?>" type="hidden">
+        <input name="lstMois" value="<?php echo $moisASelectionner; ?>" type="hidden">
+
+    </form>
+         
 </div>

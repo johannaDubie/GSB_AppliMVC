@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Gestion des frais
+ * Validation des frais
  *
  * PHP Version 7
  *
  * @category  PPE
  * @package   GSB
  * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
+ * @author    Johanna DUBIE <jonanadu38@gmail.com>
  * @copyright 2017 Réseau CERTA
  * @license   Réseau CERTA
  * @version   GIT: <0>
@@ -96,11 +96,10 @@ switch ($action) {
         $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
         $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
         $nbJustificatifs = $pdo->getNbJustificatifs($idVisiteur, $leMois);
-
-
+        include 'vues/v_afficherFrais.php';
         break;
 
-    case 'supprimerFraisHF':
+    case 'supprimerEtReporterFraisHF':
         /*
          * Récupération de toutes les variables nécessaires pour
          * garder la vue complète et le choix du visiteur/mois
@@ -118,35 +117,51 @@ switch ($action) {
         $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
         $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
         $nbJustificatifs = $pdo->getNbJustificatifs($idVisiteur, $leMois);
-
-
         //Récupération des infos sur les frais HF
         $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
         $lesIdHF = $pdo->getLesIdHorsFrais($idVisiteur, $leMois);
 
-        //Récupération de l'id du frais HF qu'on souhaite supprimer
-        $idFraisHF = filter_input(INPUT_GET, 'idFrais', FILTER_SANITIZE_STRING);
+        //si je clic sur "refuser":
+        if (isset($_POST['SupprIdFraisHF'])) {
+            //Récupération de l'id du frais HF qu'on souhaite supprimer
+            $idFraisHF = filter_input(INPUT_POST, 'SupprIdFraisHF', FILTER_SANITIZE_STRING);
+            //Son satttu passe à "refusé"
+            $pdo->modifieStatutRefuse($idFraisHF, $idVisiteur, $leMois);
+        }
 
-        /*
-         * Pour ce fraisHF, on lui change son statut:
-         * il passe à "REFUSE":
-         */        
-        $pdo -> modifieStatutRefuse($idFraisHF, $idVisiteur, $leMois);  
-        
-        /* On utilise la fonction majFraisHF, qui met à jour la 
-         * base de données en rajoutant le statut "REFUSE"
-         */
-        $pdo-> majFraisHF($idVisiteur, $leMois, $lesFrais);
+        //Si je clic sur "reporter":
+        if (isset($_POST['ReportIdFraisHF'])) {
+            //Récupération de l'idFraisHF qu'on souhaite supprimer
+            $idFraisHF = filter_input(INPUT_POST, 'ReportIdFraisHF', FILTER_SANITIZE_STRING);
+
+            //Obtention du mois suivant:
+            $moisSuivant = getMoisSuivant($leMois);
+            //Première saisie du mois ?
+            if ($pdo->estPremierFraisMois($idVisiteur, $moisSuivant)) {
+                //Créaion de la fiche de frais:
+                $pdo->creeNouvellesLignesFrais($idVisiteur, $moisSuivant);
+            }
+            //Récupération des différentes données du fraisHF:
+            $libelle = $pdo->getLibelleFraisHF($idFraisHF, $idVisiteur, $leMois);
+            $dateFrais = getNewMois($moisSuivant);
+            $montant = $pdo->getMontantFraisHF($idFraisHF, $idVisiteur, $leMois);
+            //Création du frais HF:
+            $pdo->creeNouveauFraisHorsForfait($idVisiteur, $moisSuivant, $libelle, $dateFrais, $montant);
+            //Suppression de ce frais du mois en cours de saisi:
+            $pdo->supprimerFraisHorsForfait($idFraisHF);
+        }
+
+        //Pour tous :
+        //MAJ des frais du mois en cours de saisie:
+        $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
+        $pdo->majFraisHF($idVisiteur, $leMois, $lesFrais);
         $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
-        /*
-         * Et le statut doit apparaitre dans la case du libellé,
-         * ça se fait automatiquement depuis la vue
-         */
         include 'vues/v_afficherFrais.php';
 
         break;
 
-    case 'reporterFraisHF':
+
+    case 'majNbJustificatifs':
         /*
          * Récupération de toutes les variables nécessaires pour
          * garder la vue complète et le choix du visiteur/mois
@@ -164,32 +179,16 @@ switch ($action) {
         $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
         $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
         $nbJustificatifs = $pdo->getNbJustificatifs($idVisiteur, $leMois);
+        //Récupération des infos sur les frais HF
+        $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
+        $lesIdHF = $pdo->getLesIdHorsFrais($idVisiteur, $leMois);
 
-        /*
-         * Récupération de l'id du fraisHF qu'on souhaite modifier
-         * On change son statut : il passe à "REPORTE"
-         * 
-         *  On utilise la fonction majFraisHF, qui met à jour la 
-         * base de données en rajoutant le statut "REPORTE"
-         * 
-         * On affiche ce statut dans la case, avant le libellé.
-         * 
-         * 
-         * Ou alors, on le déplace simplement sur la fiche suivante,
-         * en le supprimant de cette fiche là...à voir avec
-         * la fiche descriptive, plus en détail.
-         */
-        
-        /*
-         * on déplace ce frais pour le mois suivant.
-         * Donc si la fiche n'est pas créée, on la crée.
-         * Si elle est créée, on ajoute une ligne de frais HF
-         * avec ce frais là.
-         * La fiche aura les valeur à 0 pour les forfaitisés, 
-         * et sera dans l'état "saisie en cours" (ds le cas où new fiche)
-         */
+        //maj du nb de justificatifs lors du clic sur le bouton
+        $newNbJustificatifs = filter_input(INPUT_POST, 'nbJustificatifs', FILTER_SANITIZE_STRING);
+        $pdo->majNbJustificatifs($idVisiteur, $leMois, $newNbJustificatifs);
+        $nbJustificatifs = $pdo->getNbJustificatifs($idVisiteur, $leMois);
 
-
+        include 'vues/v_afficherFrais.php';
 
         break;
 
@@ -211,9 +210,21 @@ switch ($action) {
         $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
         $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
         $nbJustificatifs = $pdo->getNbJustificatifs($idVisiteur, $leMois);
+        $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
 
-        //L'état de la fiche passe à "validé"
-        //Et MAJ de la date de modification de la fiche 
+        //Récupération des totaux des frais:
+        $totalFHF = $pdo->totalFraisHF($idVisiteur, $leMois);
+        $totalForfait = $pdo->totalFraisForfait($idVisiteur, $leMois);
+        //Conversion en entier ?
+        //
+        //
+        $sommeValidee = $totalForfait + $totalFHF;
+        //maj du montant Validé :
+        $pdo->majMontantValide($idVisiteur, $leMois, $sommeValidee);
+        //maj de la fiche de frais:
+        $etat = 'VA';
+        $pdo->majEtatFicheFrais($idVisiteur, $leMois, $etat);
 
         break;
+    
 }

@@ -7,7 +7,7 @@
  * @category  PPE
  * @package   GSB
  * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
+ * @author    Johanna DUBIE <jonanadu38@gmail.com>
  * @copyright 2017 Réseau CERTA
  * @license   Réseau CERTA
  * @version   GIT: <0>
@@ -33,14 +33,14 @@ case 'connexion':
 case 'accueil':
     include 'controleurs/c_accueil.php';
     break;
-case 'accueilC':
-    include 'controleur/c_connexionC.php';
-    break;
 case 'gererFrais':
     include 'controleurs/c_gererFrais.php';
     break;
 case 'validerFrais':
     include 'controleurs/c_validerFrais.php';
+    break;
+case 'suivreFrais':
+    include 'controleurs/c_suivreFrais.php';
     break;
 case 'etatFrais':
     include 'controleurs/c_etatFrais.php';

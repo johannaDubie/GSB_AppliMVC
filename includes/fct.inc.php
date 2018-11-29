@@ -249,12 +249,46 @@ function nbErreurs()
         return count($_REQUEST['erreurs']);
     }
 }
-/**
- * Vérifie la validité des trois arguments : la date, le libellé du frais et le montant 
- 
- * des message d'erreurs sont ajoutés au tableau des erreurs
- 
- * @param $dateFrais 
- * @param $libelle 
- * @param $montant
- */
+  /**
+     * Retourne le mois suivant au format aaaamm selon le jour dans le mois
+     *
+     * @param String $mois au format  aaaamm
+     *
+     * @return String Mois au format aaaamm
+     */
+    function getMoisSuivant($mois)
+    {
+        $numAnnee = substr($mois, 0, 4);
+        $numMois = substr($mois, 4, 2);
+        
+        if ((int)$numMois < 12) { //Si on est pas décembre
+            $moisSuivant = (int)$numMois + 1; //Alors on passe au mois suivant
+            $annee = $numAnnee; //Et l'année reste la même
+        }else{ //Si on est en décembre
+            $moisSuivant = 1; //Le mois suivant devient janvier
+            $annee = (int)$numAnnee + 1;  //Et l'année devient l'année suivante
+        }
+        if (strlen($moisSuivant) == 1) {
+            $moisSuivant = '0' . $moisSuivant;
+        }
+        return $annee . $moisSuivant;
+    }
+    
+    /*
+     * Retourne la date du premier, pour le mois suivant
+     * 
+     * @param String $mois au format aaaamm
+     * 
+     * @return String $newDate au format jj/mm/aaaa
+     */
+    
+     function getNewMois($mois)
+    {
+        $numAnnee = substr($mois, 0, 4);
+        $numMois = substr($mois, 4, 2);
+        $numJour = "01";
+        
+        $newDate = $numJour . "/" . $numMois . "/" . $numAnnee;
+        
+        return $newDate;
+    }

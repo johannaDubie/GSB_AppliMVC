@@ -5,7 +5,11 @@
         <group>
             <file>file:/C:/wamp64/www/GSB_AppliMVC/vues/v_afficherFrais.php</file>
             <file>file:/C:/wamp64/www/GSB_AppliMVC/includes/class.pdogsb.inc.php</file>
-            <file>file:/C:/wamp64/www/GSB_AppliMVC/controleurs/c_gererFrais.php</file>
+            <file>file:/C:/wamp64/www/GSB_AppliMVC/index.php</file>
+            <file>file:/C:/wamp64/www/GSB_AppliMVC/vues/v_suiviDesFiches.php</file>
+            <file>file:/C:/wamp64/www/GSB_AppliMVC/vues/v_selectionFiche.php</file>
+            <file>file:/C:/wamp64/www/GSB_AppliMVC/controleurs/c_suivreFrais.php</file>
+            <file>file:/C:/wamp64/www/GSB_AppliMVC/vues/v_listeVisiteurs.php</file>
             <file>file:/C:/wamp64/www/GSB_AppliMVC/controleurs/c_validerFrais.php</file>
         </group>
     </open-files>
